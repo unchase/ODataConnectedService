@@ -33,6 +33,15 @@ steps:
   inputs:
     restoreSolution: '$(sln)'
 
+- task: Semmle@0
+  inputs:
+    sourceCodeDirectory: '$(Build.SourcesDirectory)'
+    language: 'csharp'
+    querySuite: 'Required'
+    timeout: '1800'
+    ram: '16384'
+    addProjectDirToScanningExclusionList: true
+
 - task: VSBuild@1
   displayName: 'Build solution - ODataConnectedService.sln'
   inputs:
