@@ -39,7 +39,7 @@ steps:
     language: 'csharp'
     cleanupBuildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe" $(sln) /t:Clean'
     buildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe" $(sln)'
-    querySuite: 'Required'
+    querySuite: 'Recommended'
     timeout: '1800'
     ram: '16384'
     addProjectDirToScanningExclusionList: true
