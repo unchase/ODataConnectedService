@@ -1,6 +1,13 @@
 trigger:
 - master
 
+schedules:
+- cron: "30 6 * * *"
+  displayName: "Nightly build"
+  branches:
+    include:
+    - master
+
 name: 'ODataConnectedService'
 
 pool:
@@ -34,6 +41,7 @@ steps:
     restoreSolution: '$(sln)'
 
 - task: Semmle@0
+  condition: or(in(variables['Build.SourceBranch'], 'refs/heads/master', 'refs/heads/release'), eq(variables['Build.Reason'], 'Schedule'))
   inputs:
     sourceCodeDirectory: '$(Build.SourcesDirectory)'
     language: 'csharp'
