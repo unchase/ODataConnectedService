@@ -2,11 +2,12 @@ trigger:
 - master
 
 schedules:
-- cron: "30 6 * * *"
+- cron: "40 6 * * *"
   displayName: "Nightly build"
   branches:
     include:
     - master
+    - integrate-semmle
 
 name: 'ODataConnectedService'
 
