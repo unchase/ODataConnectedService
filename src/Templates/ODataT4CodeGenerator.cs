@@ -1664,7 +1664,7 @@ public abstract class ODataClientTemplate : TemplateBase
     internal abstract void WriteParameterNullCheckForStaticCreateMethod(string parameterName);
     internal abstract void WritePropertyValueAssignmentForStaticCreateMethod(string instanceName, string propertyName, string parameterName);
     internal abstract void WriteMethodEndForStaticCreateMethod(string instanceName);
-    internal abstract void WritePropertyForStructuredType(string propertyType, string originalPropertyName, string propertyName, string fixedPropertyName, string privatePropertyName, string propertyInitializationValue, string propertyAttribute, string propertyDescription, bool writeOnPropertyChanged);
+    internal abstract void WritePropertyForStructuredType(string propertyType, string originalPropertyName, string propertyName, string fixedPropertyName, string privatePropertyName, string propertyInitializationValue, string propertyAttribute, string propertyDescription, int? propertyMaxLength, bool writeOnPropertyChanged);
     internal abstract void WriteINotifyPropertyChangedImplementation();
     internal abstract void WriteClassEndForStructuredType();
     internal abstract void WriteNamespaceEnd();
@@ -1689,6 +1689,7 @@ public abstract class ODataClientTemplate : TemplateBase
     internal abstract void WriteBoundFunctionReturnCollectionResultAsExtension(string functionName, string originalFunctionName, string boundTypeName, string returnTypeName, string parameters, string fullNamespace, string parameterValues, bool isComposable, bool useEntityReference, string description);
     internal abstract void WriteBoundActionAsExtension(string actionName, string originalActionName, string boundSourceType, string returnTypeName, string parameters, string fullNamespace, string parameterValues, string description);
     protected abstract void WriteDescriptionSummary(string description, bool isClass = false);
+    protected abstract void WriteStringLengthAttribute(int maxLength, string errorMessage);
     #endregion Language specific write methods.
 
     internal HashSet<EdmPrimitiveTypeKind> ClrReferenceTypes { get {
@@ -2935,7 +2936,8 @@ public abstract class ODataClientTemplate : TemplateBase
                     PrivatePropertyName = "_" + propertyName,
                     PropertyInitializationValue = Utils.GetPropertyInitializationValue(property, useDataServiceCollection, this, this.context),
                     PropertyAttribute = string.Empty,
-                    PropertyDescription = GetDescriptionAnnotation(property)?.Value
+                    PropertyDescription = GetDescriptionAnnotation(property)?.Value,
+                    PropertyMaxLength = property.Type.AsString()?.MaxLength
                 };
         }).ToList();
 
@@ -2959,7 +2961,8 @@ public abstract class ODataClientTemplate : TemplateBase
                 PrivatePropertyName = "_" + containerPropertyName,
                 PropertyInitializationValue = string.Format(this.DictionaryConstructor, this.StringTypeName, this.ObjectTypeName),
                 PropertyAttribute = containerPropertyAttribute,
-                PropertyDescription = string.Empty
+                PropertyDescription = string.Empty,
+                PropertyMaxLength = (int?)null
             });
         }
 
@@ -2980,6 +2983,7 @@ public abstract class ODataClientTemplate : TemplateBase
                 propertyInfo.PropertyInitializationValue,
                 propertyInfo.PropertyAttribute,
                 propertyInfo.PropertyDescription,
+                propertyInfo.PropertyMaxLength,
                 useDataServiceCollection);
         }
     }
@@ -5005,7 +5009,7 @@ this.Write(";\r\n        }\r\n");
 
     }
 
-    internal override void WritePropertyForStructuredType(string propertyType, string originalPropertyName, string propertyName, string fixedPropertyName, string privatePropertyName, string propertyInitializationValue, string propertyAttribute, string propertyDescription, bool writeOnPropertyChanged)
+    internal override void WritePropertyForStructuredType(string propertyType, string originalPropertyName, string propertyName, string fixedPropertyName, string privatePropertyName, string propertyInitializationValue, string propertyAttribute, string propertyDescription, int? propertyMaxLength, bool writeOnPropertyChanged)
     {
         WriteDescriptionSummary(string.IsNullOrWhiteSpace(propertyDescription) ? $"There are no comments for Property {propertyName} in the schema." : propertyDescription);
 
@@ -5027,6 +5031,11 @@ this.Write(this.ToStringHelper.ToStringWithCulture(originalPropertyName));
 this.Write("\")]\r\n");
 
 
+        }
+
+        if (propertyMaxLength != null)
+        {
+            WriteStringLengthAttribute((int)propertyMaxLength, $"{propertyName} cannot be longer than {propertyMaxLength} characters.");
         }
 
 
@@ -5913,6 +5922,22 @@ this.Write("\r\n        /// </summary>\r\n");
 
 
         }
+    }
+
+    protected override void WriteStringLengthAttribute(int maxLength, string errorMessage)
+    {
+
+this.Write("        [global::System.ComponentModel.DataAnnotations.StringLengthAttribute(");
+
+this.Write(this.ToStringHelper.ToStringWithCulture(maxLength));
+
+this.Write(", ErrorMessage = \"");
+
+this.Write(this.ToStringHelper.ToStringWithCulture(errorMessage));
+
+this.Write("\")]\r\n");
+
+
     }
 
     internal override void WriteNamespaceEnd()
@@ -7073,7 +7098,7 @@ this.Write("\r\n        End Function\r\n");
 
     }
 
-    internal override void WritePropertyForStructuredType(string propertyType, string originalPropertyName, string propertyName, string fixedPropertyName, string privatePropertyName, string propertyInitializationValue, string propertyAttribute, string propertyDescription, bool writeOnPropertyChanged)
+    internal override void WritePropertyForStructuredType(string propertyType, string originalPropertyName, string propertyName, string fixedPropertyName, string privatePropertyName, string propertyInitializationValue, string propertyAttribute, string propertyDescription, int? propertyMaxLength, bool writeOnPropertyChanged)
     {
         WriteDescriptionSummary(string.IsNullOrWhiteSpace(propertyDescription) ? $"There are no comments for Property {propertyName} in the schema." : propertyDescription);
 
@@ -7095,6 +7120,11 @@ this.Write(this.ToStringHelper.ToStringWithCulture(originalPropertyName));
 this.Write("\")>  _\r\n");
 
 
+        }
+
+        if (propertyMaxLength != null)
+        {
+            WriteStringLengthAttribute((int)propertyMaxLength, $"{propertyName} cannot be longer than {propertyMaxLength} characters.");
         }
 
 
@@ -7996,6 +8026,18 @@ this.Write("\r\n        \'\'\' </summary>\r\n");
 
 
         }
+    }
+
+    protected override void WriteStringLengthAttribute(int maxLength, string errorMessage)
+    {
+
+this.Write("        <Global.System.ComponentModel.DataAnnotations.StringLengthAttribute(");
+
+this.Write(this.ToStringHelper.ToStringWithCulture(maxLength));
+
+this.Write(")>  _\r\n");
+
+
     }
 
     internal override void WriteNamespaceEnd()
