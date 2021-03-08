@@ -591,9 +591,9 @@ namespace ODataConnectedService.Tests
                 this.CalledActions.Add("WriteMethodEndForStaticCreateMethod(" + instanceName + ")");
             }
 
-            internal override void WritePropertyForStructuredType(string propertyType, string originalPropertyName, string propertyName, string fixedPropertyName, string privatePropertyName, string propertyInitializationValue, string propertyAttribute, string propertyDescription, int? propertyMaxLength, bool writeOnPropertyChanged)
+            internal override void WritePropertyForStructuredType(string propertyType, string originalPropertyName, string propertyName, string fixedPropertyName, string privatePropertyName, string propertyInitializationValue, string propertyAttribute, string propertyDescription, int? propertyMaxLength, bool writeOnPropertyChanged, bool isNullable)
             {
-                this.CalledActions.Add("WritePropertyForStructuredType(" + propertyType + ", " + originalPropertyName + ", " + propertyName + ", " + fixedPropertyName + ", " + privatePropertyName + ", " + propertyInitializationValue + ", " + propertyAttribute + ", " + propertyMaxLength + ", " + writeOnPropertyChanged + ")");
+                this.CalledActions.Add("WritePropertyForStructuredType(" + propertyType + ", " + originalPropertyName + ", " + propertyName + ", " + fixedPropertyName + ", " + privatePropertyName + ", " + propertyInitializationValue + ", " + propertyAttribute + ", " + propertyMaxLength + ", " + writeOnPropertyChanged + ", " + isNullable + ")");
             }
 
             internal override void WriteINotifyPropertyChangedImplementation()
@@ -720,6 +720,11 @@ namespace ODataConnectedService.Tests
             }
 
             protected override void WriteStringLengthAttribute(int maxLength, string errorMessage)
+            {
+                // this method is called internally by other language specific write methods
+            }
+
+            protected override void WriteRequiredAttribute(string errorMessage)
             {
                 // this method is called internally by other language specific write methods
             }
@@ -1663,7 +1668,7 @@ namespace ODataConnectedService.Tests
                 "WriteDeclarationEndForStaticCreateMethod(EntityType, entityType)",
                 "WritePropertyValueAssignmentForStaticCreateMethod(entityType, Id, ID)",
                 "WriteMethodEndForStaticCreateMethod(entityType)",
-                "WritePropertyForStructuredType(Guid, Id, Id, Id, _Id, , , , False)",
+                "WritePropertyForStructuredType(Guid, Id, Id, Id, _Id, , , , False, False)",
                 "WriteClassEndForStructuredType()"
             };
             template.CalledActions.Should().Equal(expectedActions);
@@ -1707,7 +1712,7 @@ namespace ODataConnectedService.Tests
                 "WriteDeclarationEndForStaticCreateMethod(Customer, customer)",
                 "WritePropertyValueAssignmentForStaticCreateMethod(customer, PersonId, personId)",
                 "WriteMethodEndForStaticCreateMethod(customer)",
-                "WritePropertyForStructuredType(Int32, PersonId, PersonId, PersonId, _PersonId, , , , True)",
+                "WritePropertyForStructuredType(Int32, PersonId, PersonId, PersonId, _PersonId, , , , True, False)",
                 "WriteINotifyPropertyChangedImplementation()",
                 "WriteClassEndForStructuredType()"
             };
@@ -1754,7 +1759,7 @@ namespace ODataConnectedService.Tests
                 "WriteDeclarationEndForStaticCreateMethod(Customer, customer)",
                 "WritePropertyValueAssignmentForStaticCreateMethod(customer, PersonId, personId)",
                 "WriteMethodEndForStaticCreateMethod(customer)",
-                "WritePropertyForStructuredType(Int32, PersonId, PersonId, PersonId, _PersonId, , , , True)",
+                "WritePropertyForStructuredType(Int32, PersonId, PersonId, PersonId, _PersonId, , , , True, False)",
                 "WriteINotifyPropertyChangedImplementation()",
                 "WriteClassEndForStructuredType()"
             };
@@ -1857,7 +1862,7 @@ namespace ODataConnectedService.Tests
                 "WriteDeclarationEndForStaticCreateMethod(ComplexType, complexType)",
                 "WritePropertyValueAssignmentForStaticCreateMethod(complexType, Value, value)",
                 "WriteMethodEndForStaticCreateMethod(complexType)",
-                "WritePropertyForStructuredType(String, Value, Value, Value, _Value, , , , False)",
+                "WritePropertyForStructuredType(String, Value, Value, Value, _Value, , , , False, False)",
                 "WriteClassEndForStructuredType()"
             };
             template.CalledActions.Should().Equal(expectedActions);
@@ -2318,8 +2323,8 @@ namespace ODataConnectedService.Tests
 
             var expectedActions = new List<string>
             {
-                "WritePropertyForStructuredType(String, Name, Name, Name, _Name, , , , False)",
-                "WritePropertyForStructuredType(String, Value, Value, Value, _Value, , , , False)"
+                "WritePropertyForStructuredType(String, Name, Name, Name, _Name, , , , False, False)",
+                "WritePropertyForStructuredType(String, Value, Value, Value, _Value, , , , False, False)"
             };
             template.CalledActions.Should().Equal(expectedActions);
         }
@@ -2338,7 +2343,7 @@ namespace ODataConnectedService.Tests
 
             var expectedActions = new List<string>
             {
-                "WritePropertyForStructuredType(String, Value, Value, Value, _Value, , , , True)"
+                "WritePropertyForStructuredType(String, Value, Value, Value, _Value, , , , True, False)"
             };
             template.CalledActions.Should().Equal(expectedActions);
         }
@@ -2415,9 +2420,9 @@ namespace ODataConnectedService.Tests
 
             var expectedActions = new List<string>
             {
-                "WritePropertyForStructuredType(String, Name, Name, Name, _Name1, , , , False)",
-                "WritePropertyForStructuredType(String, _Name, _Name, _Name, __Name1, , , , False)",
-                "WritePropertyForStructuredType(String, __Name, __Name, __Name, ___Name, , , , False)"
+                "WritePropertyForStructuredType(String, Name, Name, Name, _Name1, , , , False, False)",
+                "WritePropertyForStructuredType(String, _Name, _Name, _Name, __Name1, , , , False, False)",
+                "WritePropertyForStructuredType(String, __Name, __Name, __Name, ___Name, , , , False, False)"
             };
             template.CalledActions.Should().Equal(expectedActions);
         }
@@ -2451,10 +2456,10 @@ namespace ODataConnectedService.Tests
 
             var expectedActions = new List<string>
             {
-                "WritePropertyForStructuredType(String, Name, Name2, Name2, _Name21, , , , False)",
-                "WritePropertyForStructuredType(String, name, name, name, _name, , , , False)",
-                "WritePropertyForStructuredType(String, Name1, Name1, Name1, _Name1, , , , False)",
-                "WritePropertyForStructuredType(String, _Name2, _Name2, _Name2, __Name2, , , , False)",
+                "WritePropertyForStructuredType(String, Name, Name2, Name2, _Name21, , , , False, False)",
+                "WritePropertyForStructuredType(String, name, name, name, _name, , , , False, False)",
+                "WritePropertyForStructuredType(String, Name1, Name1, Name1, _Name1, , , , False, False)",
+                "WritePropertyForStructuredType(String, _Name2, _Name2, _Name2, __Name2, , , , False, False)",
             };
             template.CalledActions.Should().Contain(expectedActions);
         }
@@ -2472,10 +2477,10 @@ namespace ODataConnectedService.Tests
 
             var expectedActions = new List<string>
             {
-                "WritePropertyForStructuredType(String, Name, Name2, Name2, _Name21, , , , False)",
-                "WritePropertyForStructuredType(String, name, Name3, Name3, _Name3, , , , False)",
-                "WritePropertyForStructuredType(String, Name1, Name1, Name1, _Name1, , , , False)",
-                "WritePropertyForStructuredType(String, _Name2, _Name2, _Name2, __Name2, , , , False)",
+                "WritePropertyForStructuredType(String, Name, Name2, Name2, _Name21, , , , False, False)",
+                "WritePropertyForStructuredType(String, name, Name3, Name3, _Name3, , , , False, False)",
+                "WritePropertyForStructuredType(String, Name1, Name1, Name1, _Name1, , , , False, False)",
+                "WritePropertyForStructuredType(String, _Name2, _Name2, _Name2, __Name2, , , , False, False)",
             };
             template.CalledActions.Should().Contain(expectedActions);
         }
